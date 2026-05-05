@@ -1,93 +1,76 @@
---[[
-    📡 TITAN BOT: SERVER SCANNER & HOPPER
-    - Chạy trên Acc Phụ. 
-    - Nhảy Server -> Quét Workspace -> Báo Webhook -> Nhảy tiếp.
-]]
+-- TẠO GIAO DIỆN (GUI)
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local TextBox = Instance.new("TextBox")
+local JoinBtn = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
 
-if not game:IsLoaded() then game.Loaded:Wait() end
+-- Cấu hình GUI
+ScreenGui.Parent = game:GetService("CoreGui") -- Hiện trong menu ẩn của Roblox
+ScreenGui.Name = "QuickJoinGui"
 
--- ================= CẤU HÌNH CỦA ÔNG =================
-local WEBHOOK_URL = "https://discord.com/api/webhooks/1501273736580567132/8eMKz7k1UtE1F_3zcE2zOiO750wRM3umAYEZEjWsxAspbt16PnxmI4Mp-xSc7nVWlwk6"
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.Position = UDim2.new(0.5, -100, 0.4, 0)
+MainFrame.Size = UDim2.new(0, 200, 0, 100)
+MainFrame.Active = true
+MainFrame.Draggable = true -- Ông có thể lấy chuột kéo bảng này đi chỗ khác
 
-local PETS_TO_FIND = {
-    "garama",    -- Ghi tên pet viết thường
-    "hugedog",
-    "chihuanini taconini"
-}
--- ====================================================
+local FrameCorner = UICorner:Clone()
+FrameCorner.Parent = MainFrame
 
-local HttpService = game:GetService("HttpService")
-local TeleportService = game:GetService("TeleportService")
-local LPlr = game:GetService("Players").LocalPlayer
-local PlaceId = game.PlaceId
-local JobId = game.JobId
+-- Ô Nhập JobId
+TextBox.Parent = MainFrame
+TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TextBox.Position = UDim2.new(0.1, 0, 0.15, 0)
+TextBox.Size = UDim2.new(0.8, 0, 0.3, 0)
+TextBox.Font = Enum.Font.SourceSans
+TextBox.PlaceholderText = "Dán JobId vào đây..."
+TextBox.Text = ""
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.TextSize = 14
+TextBox.TextTruncate = Enum.TextTruncate.AtEnd
 
-local function SendWebhook(petName)
-    local data = {
-        ["content"] = "||@everyone||", -- Ping mọi người (xóa dòng này nếu không thích ồn ào)
-        ["embeds"] = {{
-            ["title"] = "🚨 PHÁT HIỆN PET VIP!",
-            ["description"] = "**Pet tìm thấy:** `" .. petName .. "`\n**Mã Server (JobId):**\n```" .. JobId .. "
-```\n*Hãy copy mã JobId này và dùng lệnh Teleport để join!*",
-            ["color"] = tonumber("0x00FFFF")
-        }}
-    }
+UICorner:Clone().Parent = TextBox
+
+-- Nút Join
+JoinBtn.Parent = MainFrame
+JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+JoinBtn.Position = UDim2.new(0.1, 0, 0.55, 0)
+JoinBtn.Size = UDim2.new(0.8, 0, 0.3, 0)
+JoinBtn.Font = Enum.Font.SourceSansBold
+JoinBtn.Text = "JOIN SERVER"
+JoinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+JoinBtn.TextSize = 18
+
+UICorner:Clone().Parent = JoinBtn
+
+-- XỬ LÝ NHẢY SERVER
+JoinBtn.MouseButton1Click:Connect(function()
+    local jobId = TextBox.Text:gsub("%s+", "") -- Xóa khoảng trắng thừa
     
-    local req = (syn and syn.request) or request or http_request or (fluxus and fluxus.request)
-    if req then
-        pcall(function()
-            req({
-                Url = WEBHOOK_URL,
-                Method = "POST",
-                Headers = {["Content-Type"] = "application/json"},
-                Body = HttpService:JSONEncode(data)
-            })
+    if jobId and jobId ~= "" then
+        JoinBtn.Text = "ĐANG NHẢY..."
+        JoinBtn.BackgroundColor3 = Color3.fromRGB(150, 150, 0)
+        
+        local success, err = pcall(function()
+            game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, jobId, game.Players.LocalPlayer)
         end)
+        
+        if not success then
+            JoinBtn.Text = "LỖI! THỬ LẠI"
+            JoinBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+            warn("Lỗi Join: " .. tostring(err))
+            task.wait(2)
+            JoinBtn.Text = "JOIN SERVER"
+            JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+        end
     else
-        print("Executor của ông không hỗ trợ gửi Webhook!")
+        JoinBtn.Text = "CHƯA NHẬP ID!"
+        task.wait(1)
+        JoinBtn.Text = "JOIN SERVER"
     end
-end
-
-local function ServerHop()
-    print("Đang tìm Server mới để nhảy...")
-    task.wait(2)
-    local success, servers = pcall(function()
-        return HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Desc&limit=100")).data
-    end)
-    
-    if success and servers then
-        for _, s in pairs(servers) do
-            if s.playing < s.maxPlayers and s.id ~= JobId then
-                TeleportService:TeleportToPlaceInstance(PlaceId, s.id, LPlr)
-                task.wait(5)
-            end
-        end
-    end
-end
-
-task.spawn(function()
-    print("Bắt đầu quét Server...")
-    task.wait(3) 
-    
-    local found = false
-    for _, item in pairs(workspace:GetDescendants()) do
-        if item:IsA("Model") or item:IsA("BasePart") then
-            for _, vipPet in pairs(PETS_TO_FIND) do
-                if item.Name:lower():find(vipPet) then
-                    print("🎯 TÌM THẤY: " .. item.Name)
-                    SendWebhook(item.Name)
-                    found = true
-                    task.wait(3) -- Đợi gửi xong Webhook
-                    break
-                end
-            end
-        end
-        if found then break end 
-    end
-
-    if not found then
-        print("Server này không có pet, đang nhảy...")
-    end
-    
-    ServerHop()
 end)
+
+print("✅ GUI Nhập JobId đã sẵn sàng!")
