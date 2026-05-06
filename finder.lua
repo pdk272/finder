@@ -60,7 +60,7 @@ JoinBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
 
 JoinBtn.Position = UDim2.new(0.1, 0, 0.4, 0)
 
-JoinBtn.Text = "JOIN SERVER"
+JoinBtn.Text = "tham gia"
 
 JoinBtn.Font = Enum.Font.SourceSansBold
 
@@ -231,7 +231,7 @@ end
 
 end
 
-task.wait(0.20) -- Tốc độ nhặt cực nhanh, khoảng 6 lần/giây để tránh bị kick
+task.wait(0.90) -- Tốc độ nhặt cực nhanh, khoảng 6 lần/giây để tránh bị kick
 
 end
 
