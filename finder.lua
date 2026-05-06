@@ -65,10 +65,3 @@ task.spawn(function()
         task.wait(smartDelay())
     end
 end)
-
-LocalPlayer.Idled:Connect(function()
-    pcall(function()
-        game:GetService("VirtualUser"):CaptureController()
-        game:GetService("VirtualUser"):ClickButton2(Vector2.new())
-    end)
-end)
