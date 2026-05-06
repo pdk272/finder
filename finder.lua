@@ -1,56 +1,84 @@
--- MASTER HUB V6: SIÊU TỐC ĐỘ + CHỐNG KICK + FIX TÍN HIỆU
+-- MASTER HUB V7: AUTO GIỮ E CHUẨN MEN + CHỐNG KICK
 local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 local Main = Instance.new("Frame", ScreenGui)
-local Sidebar = Instance.new("Frame", Main)
 local Content = Instance.new("ScrollingFrame", Main)
 local UIListLayout = Instance.new("UIListLayout", Content)
 
 Main.Size = UDim2.new(0, 480, 0, 320)
 Main.Position = UDim2.new(0.3, 0, 0.3, 0)
-Main.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+Main.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 Main.Active = true Main.Draggable = true
 
-Sidebar.Size = UDim2.new(0, 120, 1, 0)
-Sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+-- NÚT 1: AUTO GIỮ E (An toàn 100%, tự giữ E 2.1 giây rồi nhả)
+local HoldEBtn = Instance.new("TextButton", Main)
+HoldEBtn.Size = UDim2.new(0, 110, 0, 40)
+HoldEBtn.Position = UDim2.new(0.02, 0, 0.7, 0)
+HoldEBtn.Text = "GIỮ E: OFF"
+HoldEBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+HoldEBtn.TextColor3 = Color3.new(1, 1, 1)
 
--- NÚT AUTO E SIÊU CẤP (ÉP 20-30 LẦN/S)
-local AutoEBtn = Instance.new("TextButton", Sidebar)
-AutoEBtn.Size = UDim2.new(0.9, 0, 0, 50)
-AutoEBtn.Position = UDim2.new(0.05, 0, 0.8, 0)
-AutoEBtn.Text = "AUTO E: OFF"
-AutoEBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-AutoEBtn.TextColor3 = Color3.new(1, 1, 1)
-
-local autoE = false
-AutoEBtn.MouseButton1Click:Connect(function()
-    autoE = not autoE
-    AutoEBtn.Text = autoE and "E: MAX SPEED" or "AUTO E: OFF"
-    AutoEBtn.BackgroundColor3 = autoE and Color3.fromRGB(0, 180, 0) or Color3.fromRGB(200, 0, 0)
+local isHolding = false
+HoldEBtn.MouseButton1Click:Connect(function()
+    isHolding = not isHolding
+    HoldEBtn.Text = isHolding and "ĐANG GIỮ E..." or "GIỮ E: OFF"
+    HoldEBtn.BackgroundColor3 = isHolding and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(200, 0, 0)
 end)
 
--- Vòng lặp ép E: Dùng Heartbeat để tối ưu tốc độ mà không gây crash
-game:GetService("RunService").Heartbeat:Connect(function()
-    if autoE then
-        local Vim = game:GetService("VirtualInputManager")
-        Vim:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-        task.wait() -- Nghỉ cực ngắn để tránh BAC-6197
-        Vim:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+task.spawn(function()
+    local Vim = game:GetService("VirtualInputManager")
+    while true do
+        if isHolding then
+            Vim:SendKeyEvent(true, Enum.KeyCode.E, false, game) -- Nhấn xuống
+            task.wait(2.1) -- Giữ chặt 2.1 giây để nhặt xong pet
+            Vim:SendKeyEvent(false, Enum.KeyCode.E, false, game) -- Thả ra
+            task.wait(0.1) -- Nghỉ 1 nhịp ngắn
+        else
+            task.wait(0.5)
+        end
     end
 end)
 
--- Danh sách Server
+-- NÚT 2: HACK E 0 GIÂY (Bỏ qua 2s của game, pick ngay lập tức)
+local HackEBtn = Instance.new("TextButton", Main)
+HackEBtn.Size = UDim2.new(0, 110, 0, 40)
+HackEBtn.Position = UDim2.new(0.02, 0, 0.85, 0)
+HackEBtn.Text = "HACK E 0s: OFF"
+HackEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 150)
+HackEBtn.TextColor3 = Color3.new(1, 1, 1)
+
+local autoHackE = false
+HackEBtn.MouseButton1Click:Connect(function()
+    autoHackE = not autoHackE
+    HackEBtn.Text = autoHackE and "HACK 0s: ON" or "HACK E 0s: OFF"
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if autoHackE then
+            for _, prompt in pairs(workspace:GetDescendants()) do
+                if prompt:IsA("ProximityPrompt") then
+                    prompt.HoldDuration = 0 -- Ép thời gian giữ về 0
+                    if fireproximityprompt then fireproximityprompt(prompt) end
+                end
+            end
+        end
+    end
+end)
+
+-- KHU VỰC HIỆN SERVER TỪ ACC PHỤ
 Content.Size = UDim2.new(0, 340, 0, 260)
-Content.Position = UDim2.new(0, 130, 0, 50)
+Content.Position = UDim2.new(0, 130, 0, 20)
 Content.BackgroundTransparency = 1
-UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.Padding = UDim.new(0, 5)
 
 local function CreateEntry(data)
     local Frame = Instance.new("Frame", Content)
-    Frame.Size = UDim2.new(1, -10, 0, 70)
-    Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    Frame.Size = UDim2.new(1, -10, 0, 60)
+    Frame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 
     local Info = Instance.new("TextLabel", Frame)
-    Info.Text = "🌟 " .. tostring(data.PetName):upper() .. "\nAcc: " .. tostring(data.AccSource) .. " | " .. tostring(data.Players)
+    Info.Text = "🔥 " .. tostring(data.PetName):upper() .. "\nBot: " .. tostring(data.AccSource)
     Info.Size = UDim2.new(0.7, 0, 1, 0)
     Info.TextColor3 = Color3.new(1, 1, 1)
     Info.BackgroundTransparency = 1
@@ -60,7 +88,7 @@ local function CreateEntry(data)
     Join.Text = "Join"
     Join.Size = UDim2.new(0.25, 0, 0.6, 0)
     Join.Position = UDim2.new(0.72, 0, 0.2, 0)
-    Join.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    Join.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
     Join.TextColor3 = Color3.new(1, 1, 1)
 
     Join.MouseButton1Click:Connect(function()
@@ -69,7 +97,6 @@ local function CreateEntry(data)
     task.delay(180, function() Frame:Destroy() end)
 end
 
--- NHẬN TÍN HIỆU (MessagingService - Dùng tên kênh riêng biệt)
 game:GetService("MessagingService"):SubscribeAsync("HupPet_Channel", function(msg)
     pcall(function() CreateEntry(msg.Data) end)
 end)
