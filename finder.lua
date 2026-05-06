@@ -84,7 +84,7 @@ task.spawn(function()
             local processed = 0
 
             for _, obj in ipairs(workspace:GetDescendants()) do
-                if processed >= 20 then break end -- 🔥 chống lag
+                if processed >= 35 then break end -- 🔥 chống lag
 
                 if obj:IsA("ProximityPrompt") then
                     if obj.KeyboardKeyCode == Enum.KeyCode.E then
