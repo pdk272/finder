@@ -1,105 +1,69 @@
-local CoreGui = game:GetService("CoreGui")
-local TeleportService = game:GetService("TeleportService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+-- SCRIPT CHO ACC CHÍNH (MASTER BRAIN)
+if not game:IsLoaded() then game.Loaded:Wait() end
 
--- ===== 1. TẠO GIAO DIỆN (GUI) =====
-local ScreenGui = Instance.new("ScreenGui", CoreGui)
-ScreenGui.Name = "FastRobberV6"
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local AutoE_Btn = Instance.new("TextButton")
+local JobIdInput = Instance.new("TextBox")
+local Join_Btn = Instance.new("TextButton")
 
-local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 200, 0, 150)
-MainFrame.Position = UDim2.new(0.5, -100, 0.4, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+-- Cấu hình Giao diện
+ScreenGui.Parent = game:GetService("CoreGui")
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.Size = UDim2.new(0, 200, 0, 180)
+MainFrame.Position = UDim2.new(0.05, 0, 0.4, 0)
 MainFrame.Active = true
-MainFrame.Draggable = true
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
+MainFrame.Draggable = true -- Có thể kéo bảng đi chỗ khác cho đỡ vướng
 
--- Ô nhập JobId
-local TextBox = Instance.new("TextBox", MainFrame)
-TextBox.Size = UDim2.new(0.8, 0, 0.2, 0)
-TextBox.Position = UDim2.new(0.1, 0, 0.1, 0)
-TextBox.PlaceholderText = "Dán JobId..."
-TextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TextBox.TextColor3 = Color3.new(1, 1, 1)
-TextBox.ClearTextOnFocus = true
-Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0, 6)
+Title.Parent = MainFrame
+Title.Text = "BRAIN MASTER V1"
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 
--- Nút Join
-local JoinBtn = Instance.new("TextButton", MainFrame)
-JoinBtn.Size = UDim2.new(0.8, 0, 0.2, 0)
-JoinBtn.Position = UDim2.new(0.1, 0, 0.4, 0)
-JoinBtn.Text = "JOIN SERVER"
-JoinBtn.Font = Enum.Font.SourceSansBold
-JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-JoinBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", JoinBtn).CornerRadius = UDim.new(0, 6)
+-- 1. NÚT AUTO E (0.17 GIÂY)
+AutoE_Btn.Parent = MainFrame
+AutoE_Btn.Position = UDim2.new(0.1, 0, 0.25, 0)
+AutoE_Btn.Size = UDim2.new(0.8, 0, 0.25, 0)
+AutoE_Btn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+AutoE_Btn.Text = "AUTO E: OFF"
+AutoE_Btn.TextColor3 = Color3.new(1, 1, 1)
 
--- Nút Auto E
-local AutoEBtn = Instance.new("TextButton", MainFrame)
-AutoEBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
-AutoEBtn.Position = UDim2.new(0.1, 0, 0.7, 0)
-AutoEBtn.Text = "AUTO E: OFF"
-AutoEBtn.Font = Enum.Font.SourceSansBold
-AutoEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-AutoEBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", AutoEBtn).CornerRadius = UDim.new(0, 6)
-
--- ===== 2. LOGIC CƯỚP SIÊU TỐC =====
-
-local AutoE_Enabled = false
-
-AutoEBtn.MouseButton1Click:Connect(function()
-    AutoE_Enabled = not AutoE_Enabled
-    if AutoE_Enabled then
-        AutoEBtn.Text = "AUTO E: ON"
-        AutoEBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-    else
-        AutoEBtn.Text = "AUTO E: OFF"
-        AutoEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    end
+local autoE = false
+AutoE_Btn.MouseButton1Click:Connect(function()
+    autoE = not autoE
+    AutoE_Btn.Text = autoE and "AUTO E: ON (0.17s)" or "AUTO E: OFF"
+    AutoE_Btn.BackgroundColor3 = autoE and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
 end)
 
--- Vòng lặp quét vùng hẹp xung quanh Player (Cực nhẹ, cực nhanh)
 task.spawn(function()
-    while true do
-        if AutoE_Enabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local myPos = LocalPlayer.Character.HumanoidRootPart.Position
-            
-            -- Quét các vật thể có ProximityPrompt trong Workspace
-            for _, obj in ipairs(workspace:GetDescendants()) do
-                if obj:IsA("ProximityPrompt") then
-                    -- Kiểm tra phím E và khoảng cách
-                    if obj.KeyboardKeyCode == Enum.KeyCode.E then
-                        local parent = obj.Parent
-                        if parent and parent:IsA("BasePart") then
-                            local dist = (myPos - parent.Position).Magnitude
-                            if dist <= obj.MaxActivationDistance then
-                                -- ÉP VỀ 0 GIÂY VÀ KÍCH HOẠT TỨC THÌ
-                                obj.HoldDuration = 0
-                                obj:InputHoldBegin()
-                                obj:InputHoldEnd()
-                            end
-                        else
-                            -- Nếu pet không phải Part, cứ ép 0s và bấm đại cho chắc
-                            obj.HoldDuration = 0
-                            obj:InputHoldBegin()
-                            obj:InputHoldEnd()
-                        end
-                    end
-                end
-            end
+    while task.wait(0.17) do -- Tốc độ 0.17 giây theo ý ông
+        if autoE then
+            game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
+            task.wait(0.05)
+            game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.E, false, game)
         end
-        task.wait(0.17) -- Tốc độ 20 lần mỗi giây, nhặt pet như một vị thần
     end
 end)
 
--- Nút nhảy server
-JoinBtn.MouseButton1Click:Connect(function()
-    local id = TextBox.Text:gsub("%s+", "")
-    if id ~= "" then
-        pcall(function()
-            TeleportService:TeleportToPlaceInstance(game.PlaceId, id)
-        end)
+-- 2. NHẬP JOBID VÀ JOIN NHANH
+JobIdInput.Parent = MainFrame
+JobIdInput.PlaceholderText = "Dán JobId vào đây..."
+JobIdInput.Size = UDim2.new(0.8, 0, 0.15, 0)
+JobIdInput.Position = UDim2.new(0.1, 0, 0.55, 0)
+
+Join_Btn.Parent = MainFrame
+Join_Btn.Text = "BAY VÀO SERVER"
+Join_Btn.Size = UDim2.new(0.8, 0, 0.2, 0)
+Join_Btn.Position = UDim2.new(0.1, 0, 0.75, 0)
+Join_Btn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+Join_Btn.TextColor3 = Color3.new(1, 1, 1)
+
+Join_Btn.MouseButton1Click:Connect(function()
+    local id = JobIdInput.Text
+    if id and #id > 5 then
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, id)
     end
 end)
