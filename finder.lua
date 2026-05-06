@@ -1,46 +1,42 @@
--- MASTER GUI V2: BRAINROT FINDER (GIỐNG ẢNH EPSILON HUB)
-local ScreenGui = Instance.new("ScreenGui")
-local Main = Instance.new("Frame")
-local Sidebar = Instance.new("Frame")
-local Content = Instance.new("ScrollingFrame")
-local UIListLayout = Instance.new("UIListLayout")
-local AutoEBtn = Instance.new("TextButton")
+-- MASTER HUB V2: EPSILON STYLE + AUTO E
+local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+local Main = Instance.new("Frame", ScreenGui)
+local Sidebar = Instance.new("Frame", Main)
+local Content = Instance.new("ScrollingFrame", Main)
+local UIListLayout = Instance.new("UIListLayout", Content)
 
-ScreenGui.Parent = game:GetService("CoreGui")
-Main.Name = "EpsilonStyle"
-Main.Size = UDim2.new(0, 450, 0, 300)
+-- Thiết kế giao diện giống ảnh b0abd6
+Main.Size = UDim2.new(0, 480, 0, 320)
 Main.Position = UDim2.new(0.3, 0, 0.3, 0)
 Main.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-Main.Active = true
-Main.Draggable = true
+Main.Active = true Main.Draggable = true
 
--- Sidebar giả lập ảnh
-Sidebar.Size = UDim2.new(0, 100, 1, 0)
-Sidebar.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-Sidebar.Parent = Main
+Sidebar.Size = UDim2.new(0, 120, 1, 0)
+Sidebar.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
 
 local TabLabel = Instance.new("TextLabel", Sidebar)
-TabLabel.Text = "Brainrot Finder"
-TabLabel.Size = UDim2.new(1, 0, 0, 50)
+TabLabel.Text = "🐾 Brainrot Finder"
+TabLabel.Size = UDim2.new(1, 0, 0, 40)
 TabLabel.TextColor3 = Color3.new(1, 1, 1)
 TabLabel.BackgroundTransparency = 1
 
--- Nút Auto E 0.17s
-AutoEBtn.Parent = Sidebar
+-- NÚT AUTO E (0.17 GIÂY)
+local AutoEBtn = Instance.new("TextButton", Sidebar)
 AutoEBtn.Size = UDim2.new(0.9, 0, 0, 40)
-AutoEBtn.Position = UDim2.new(0.05, 0, 0.8, 0)
-AutoEBtn.Text = "Auto E: Off"
+AutoEBtn.Position = UDim2.new(0.05, 0, 0.85, 0)
+AutoEBtn.Text = "AUTO E: OFF"
 AutoEBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+AutoEBtn.TextColor3 = Color3.new(1, 1, 1)
 
 local autoE = false
 AutoEBtn.MouseButton1Click:Connect(function()
     autoE = not autoE
-    AutoEBtn.Text = autoE and "E: ON" or "E: OFF"
+    AutoEBtn.Text = autoE and "AUTO E: ON" or "AUTO E: OFF"
     AutoEBtn.BackgroundColor3 = autoE and Color3.fromRGB(0, 180, 0) or Color3.fromRGB(200, 0, 0)
 end)
 
 task.spawn(function()
-    while task.wait(0.5) do
+    while task.wait(0.17) do
         if autoE then
             game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.E, false, game)
             task.wait(0.05)
@@ -49,43 +45,40 @@ task.spawn(function()
     end
 end)
 
--- Vùng hiện danh sách Server
-Content.Size = UDim2.new(0, 330, 0, 240)
-Content.Position = UDim2.new(0, 110, 0, 50)
-Content.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-Content.BorderSizePixel = 0
-Content.Parent = Main
-UIListLayout.Parent = Content
-UIListLayout.Padding = UDim.new(0, 5)
+-- Danh sách Server
+Content.Size = UDim2.new(0, 340, 0, 260)
+Content.Position = UDim2.new(0, 130, 0, 50)
+Content.BackgroundTransparency = 1
+UIListLayout.Padding = UDim.new(0, 8)
 
--- HÀM TẠO DÒNG SERVER (GIỐNG NÚT JOIN TRONG ẢNH)
-local function CreateServerEntry(data)
-    local Entry = Instance.new("Frame")
-    Entry.Size = UDim2.new(1, -10, 0, 60)
-    Entry.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-    Entry.Parent = Content
+-- HÀM TẠO NÚT JOIN KHI CÓ THÔNG BÁO
+local function CreateEntry(data)
+    local Frame = Instance.new("Frame", Content)
+    Frame.Size = UDim2.new(1, -10, 0, 70)
+    Frame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 
-    local Info = Instance.new("TextLabel", Entry)
-    Info.Text = "🔥 " .. data.PetName:upper() .. "\nPlayers: " .. data.Players
+    local Info = Instance.new("TextLabel", Frame)
+    Info.Text = "🌟 " .. data.PetName:upper() .. "\nPlayers: " .. data.Players .. " | Bot: " .. data.AccSource
     Info.Size = UDim2.new(0.7, 0, 1, 0)
     Info.TextColor3 = Color3.new(1, 1, 1)
     Info.BackgroundTransparency = 1
     Info.TextXAlignment = Enum.TextXAlignment.Left
 
-    local JoinBtn = Instance.new("TextButton", Entry)
-    JoinBtn.Text = "Join"
-    JoinBtn.Size = UDim2.new(0.25, 0, 0.6, 0)
-    JoinBtn.Position = UDim2.new(0.7, 0, 0.2, 0)
-    JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-    JoinBtn.TextColor3 = Color3.new(1, 1, 1)
+    local Join = Instance.new("TextButton", Frame)
+    Join.Text = "Join"
+    Join.Size = UDim2.new(0.25, 0, 0.6, 0)
+    Join.Position = UDim2.new(0.72, 0, 0.2, 0)
+    Join.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+    Join.TextColor3 = Color3.new(1, 1, 1)
 
-    JoinBtn.MouseButton1Click:Connect(function()
+    Join.MouseButton1Click:Connect(function()
         game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, data.JobId)
     end)
+    
+    task.delay(180, function() Frame:Destroy() end) -- Tự xóa sau 3 phút
 end
 
--- LẮNG NGHE TÍN HIỆU TỪ 10 ACC PHỤ
-game:GetService("MessagingService"):SubscribeAsync("BrainrotFinderSignal", function(message)
-    local data = message.Data
-    CreateServerEntry(data)
+-- LẮNG NGHE TÍN HIỆU
+game:GetService("MessagingService"):SubscribeAsync("BrainrotFinderSignal", function(msg)
+    CreateEntry(msg.Data)
 end)
