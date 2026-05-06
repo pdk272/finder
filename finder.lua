@@ -1,102 +1,69 @@
--- MASTER HUB V7: AUTO GIỮ E CHUẨN MEN + CHỐNG KICK
+if not game:IsLoaded() then game.Loaded:Wait() end
+
 local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
 local Main = Instance.new("Frame", ScreenGui)
-local Content = Instance.new("ScrollingFrame", Main)
-local UIListLayout = Instance.new("UIListLayout", Content)
+local Title = Instance.new("TextLabel", Main)
+local JobIdInput = Instance.new("TextBox", Main)
+local JoinBtn = Instance.new("TextButton", Main)
+local HackEBtn = Instance.new("TextButton", Main)
 
-Main.Size = UDim2.new(0, 480, 0, 320)
-Main.Position = UDim2.new(0.3, 0, 0.3, 0)
-Main.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+Main.Size = UDim2.new(0, 220, 0, 180)
+Main.Position = UDim2.new(0.05, 0, 0.4, 0)
+Main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Main.Active = true Main.Draggable = true
 
--- NÚT 1: AUTO GIỮ E (An toàn 100%, tự giữ E 2.1 giây rồi nhả)
-local HoldEBtn = Instance.new("TextButton", Main)
-HoldEBtn.Size = UDim2.new(0, 110, 0, 40)
-HoldEBtn.Position = UDim2.new(0.02, 0, 0.7, 0)
-HoldEBtn.Text = "GIỮ E: OFF"
-HoldEBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-HoldEBtn.TextColor3 = Color3.new(1, 1, 1)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "HÚP PET CỔ ĐIỂN"
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 
-local isHolding = false
-HoldEBtn.MouseButton1Click:Connect(function()
-    isHolding = not isHolding
-    HoldEBtn.Text = isHolding and "ĐANG GIỮ E..." or "GIỮ E: OFF"
-    HoldEBtn.BackgroundColor3 = isHolding and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(200, 0, 0)
-end)
+-- NHẬP JOBID
+JobIdInput.Size = UDim2.new(0.9, 0, 0, 30)
+JobIdInput.Position = UDim2.new(0.05, 0, 0.25, 0)
+JobIdInput.PlaceholderText = "Dán JobId vào đây..."
+JobIdInput.TextScaled = true
 
-task.spawn(function()
-    local Vim = game:GetService("VirtualInputManager")
-    while true do
-        if isHolding then
-            Vim:SendKeyEvent(true, Enum.KeyCode.E, false, game) -- Nhấn xuống
-            task.wait(2.1) -- Giữ chặt 2.1 giây để nhặt xong pet
-            Vim:SendKeyEvent(false, Enum.KeyCode.E, false, game) -- Thả ra
-            task.wait(0.1) -- Nghỉ 1 nhịp ngắn
-        else
-            task.wait(0.5)
-        end
+-- NÚT BAY
+JoinBtn.Size = UDim2.new(0.9, 0, 0, 35)
+JoinBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
+JoinBtn.Text = "BAY VÀO SERVER"
+JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+JoinBtn.TextColor3 = Color3.new(1, 1, 1)
+
+JoinBtn.MouseButton1Click:Connect(function()
+    local id = JobIdInput.Text
+    if id and #id > 5 then
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, id)
     end
 end)
 
--- NÚT 2: HACK E 0 GIÂY (Bỏ qua 2s của game, pick ngay lập tức)
-local HackEBtn = Instance.new("TextButton", Main)
-HackEBtn.Size = UDim2.new(0, 110, 0, 40)
-HackEBtn.Position = UDim2.new(0.02, 0, 0.85, 0)
+-- HACK ÉP E 0 GIÂY MÀ KHÔNG BỊ KICK
+HackEBtn.Size = UDim2.new(0.9, 0, 0, 40)
+HackEBtn.Position = UDim2.new(0.05, 0, 0.7, 0)
 HackEBtn.Text = "HACK E 0s: OFF"
-HackEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 150)
+HackEBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
 HackEBtn.TextColor3 = Color3.new(1, 1, 1)
 
-local autoHackE = false
+local autoHack = false
 HackEBtn.MouseButton1Click:Connect(function()
-    autoHackE = not autoHackE
-    HackEBtn.Text = autoHackE and "HACK 0s: ON" or "HACK E 0s: OFF"
+    autoHack = not autoHack
+    HackEBtn.Text = autoHack and "HACK 0s: ĐANG BẬT" or "HACK E 0s: OFF"
+    HackEBtn.BackgroundColor3 = autoHack and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
 end)
 
+-- Lõi Hack Nhặt Đồ 0 Giây (Bypass 2 giây của game)
 task.spawn(function()
     while true do
         task.wait(0.1)
-        if autoHackE then
+        if autoHack then
             for _, prompt in pairs(workspace:GetDescendants()) do
                 if prompt:IsA("ProximityPrompt") then
-                    prompt.HoldDuration = 0 -- Ép thời gian giữ về 0
-                    if fireproximityprompt then fireproximityprompt(prompt) end
+                    prompt.HoldDuration = 0 -- Ép thời gian chờ về 0
+                    if fireproximityprompt then
+                        fireproximityprompt(prompt) -- Chọt cho nhặt luôn
+                    end
                 end
             end
         end
     end
-end)
-
--- KHU VỰC HIỆN SERVER TỪ ACC PHỤ
-Content.Size = UDim2.new(0, 340, 0, 260)
-Content.Position = UDim2.new(0, 130, 0, 20)
-Content.BackgroundTransparency = 1
-UIListLayout.Padding = UDim.new(0, 5)
-
-local function CreateEntry(data)
-    local Frame = Instance.new("Frame", Content)
-    Frame.Size = UDim2.new(1, -10, 0, 60)
-    Frame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-
-    local Info = Instance.new("TextLabel", Frame)
-    Info.Text = "🔥 " .. tostring(data.PetName):upper() .. "\nBot: " .. tostring(data.AccSource)
-    Info.Size = UDim2.new(0.7, 0, 1, 0)
-    Info.TextColor3 = Color3.new(1, 1, 1)
-    Info.BackgroundTransparency = 1
-    Info.TextXAlignment = Enum.TextXAlignment.Left
-
-    local Join = Instance.new("TextButton", Frame)
-    Join.Text = "Join"
-    Join.Size = UDim2.new(0.25, 0, 0.6, 0)
-    Join.Position = UDim2.new(0.72, 0, 0.2, 0)
-    Join.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-    Join.TextColor3 = Color3.new(1, 1, 1)
-
-    Join.MouseButton1Click:Connect(function()
-        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, data.JobId)
-    end)
-    task.delay(180, function() Frame:Destroy() end)
-end
-
-game:GetService("MessagingService"):SubscribeAsync("HupPet_Channel", function(msg)
-    pcall(function() CreateEntry(msg.Data) end)
 end)
