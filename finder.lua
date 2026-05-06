@@ -1,76 +1,105 @@
--- TẠO GIAO DIỆN (GUI)
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local TextBox = Instance.new("TextBox")
-local JoinBtn = Instance.new("TextButton")
-local UICorner = Instance.new("UICorner")
+local CoreGui = game:GetService("CoreGui")
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
--- Cấu hình GUI
-ScreenGui.Parent = game:GetService("CoreGui") -- Hiện trong menu ẩn của Roblox
-ScreenGui.Name = "QuickJoinGui"
+-- ===== 1. TẠO GIAO DIỆN (GUI) =====
+local ScreenGui = Instance.new("ScreenGui", CoreGui)
+ScreenGui.Name = "FastRobberV6"
 
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 200, 0, 150)
 MainFrame.Position = UDim2.new(0.5, -100, 0.4, 0)
-MainFrame.Size = UDim2.new(0, 200, 0, 100)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 MainFrame.Active = true
-MainFrame.Draggable = true -- Ông có thể lấy chuột kéo bảng này đi chỗ khác
+MainFrame.Draggable = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 
-local FrameCorner = UICorner:Clone()
-FrameCorner.Parent = MainFrame
-
--- Ô Nhập JobId
-TextBox.Parent = MainFrame
-TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-TextBox.Position = UDim2.new(0.1, 0, 0.15, 0)
-TextBox.Size = UDim2.new(0.8, 0, 0.3, 0)
-TextBox.Font = Enum.Font.SourceSans
-TextBox.PlaceholderText = "Dán JobId vào đây..."
-TextBox.Text = ""
-TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextBox.TextSize = 14
-TextBox.TextTruncate = Enum.TextTruncate.AtEnd
-
-UICorner:Clone().Parent = TextBox
+-- Ô nhập JobId
+local TextBox = Instance.new("TextBox", MainFrame)
+TextBox.Size = UDim2.new(0.8, 0, 0.2, 0)
+TextBox.Position = UDim2.new(0.1, 0, 0.1, 0)
+TextBox.PlaceholderText = "Dán JobId..."
+TextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+TextBox.TextColor3 = Color3.new(1, 1, 1)
+TextBox.ClearTextOnFocus = true
+Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0, 6)
 
 -- Nút Join
-JoinBtn.Parent = MainFrame
-JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-JoinBtn.Position = UDim2.new(0.1, 0, 0.55, 0)
-JoinBtn.Size = UDim2.new(0.8, 0, 0.3, 0)
-JoinBtn.Font = Enum.Font.SourceSansBold
+local JoinBtn = Instance.new("TextButton", MainFrame)
+JoinBtn.Size = UDim2.new(0.8, 0, 0.2, 0)
+JoinBtn.Position = UDim2.new(0.1, 0, 0.4, 0)
 JoinBtn.Text = "JOIN SERVER"
-JoinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-JoinBtn.TextSize = 18
+JoinBtn.Font = Enum.Font.SourceSansBold
+JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+JoinBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", JoinBtn).CornerRadius = UDim.new(0, 6)
 
-UICorner:Clone().Parent = JoinBtn
+-- Nút Auto E
+local AutoEBtn = Instance.new("TextButton", MainFrame)
+AutoEBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
+AutoEBtn.Position = UDim2.new(0.1, 0, 0.7, 0)
+AutoEBtn.Text = "AUTO E: OFF"
+AutoEBtn.Font = Enum.Font.SourceSansBold
+AutoEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+AutoEBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", AutoEBtn).CornerRadius = UDim.new(0, 6)
 
--- XỬ LÝ NHẢY SERVER
-JoinBtn.MouseButton1Click:Connect(function()
-    local jobId = TextBox.Text:gsub("%s+", "") -- Xóa khoảng trắng thừa
-    
-    if jobId and jobId ~= "" then
-        JoinBtn.Text = "ĐANG NHẢY..."
-        JoinBtn.BackgroundColor3 = Color3.fromRGB(150, 150, 0)
-        
-        local success, err = pcall(function()
-            game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, jobId, game.Players.LocalPlayer)
-        end)
-        
-        if not success then
-            JoinBtn.Text = "LỖI! THỬ LẠI"
-            JoinBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-            warn("Lỗi Join: " .. tostring(err))
-            task.wait(2)
-            JoinBtn.Text = "JOIN SERVER"
-            JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-        end
+-- ===== 2. LOGIC CƯỚP SIÊU TỐC =====
+
+local AutoE_Enabled = false
+
+AutoEBtn.MouseButton1Click:Connect(function()
+    AutoE_Enabled = not AutoE_Enabled
+    if AutoE_Enabled then
+        AutoEBtn.Text = "AUTO E: ON"
+        AutoEBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
     else
-        JoinBtn.Text = "CHƯA NHẬP ID!"
-        task.wait(1)
-        JoinBtn.Text = "JOIN SERVER"
+        AutoEBtn.Text = "AUTO E: OFF"
+        AutoEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
     end
 end)
 
-print("✅ GUI Nhập JobId đã sẵn sàng!")
+-- Vòng lặp quét vùng hẹp xung quanh Player (Cực nhẹ, cực nhanh)
+task.spawn(function()
+    while true do
+        if AutoE_Enabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local myPos = LocalPlayer.Character.HumanoidRootPart.Position
+            
+            -- Quét các vật thể có ProximityPrompt trong Workspace
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                if obj:IsA("ProximityPrompt") then
+                    -- Kiểm tra phím E và khoảng cách
+                    if obj.KeyboardKeyCode == Enum.KeyCode.E then
+                        local parent = obj.Parent
+                        if parent and parent:IsA("BasePart") then
+                            local dist = (myPos - parent.Position).Magnitude
+                            if dist <= obj.MaxActivationDistance then
+                                -- ÉP VỀ 0 GIÂY VÀ KÍCH HOẠT TỨC THÌ
+                                obj.HoldDuration = 0
+                                obj:InputHoldBegin()
+                                obj:InputHoldEnd()
+                            end
+                        else
+                            -- Nếu pet không phải Part, cứ ép 0s và bấm đại cho chắc
+                            obj.HoldDuration = 0
+                            obj:InputHoldBegin()
+                            obj:InputHoldEnd()
+                        end
+                    end
+                end
+            end
+        end
+        task.wait(0.17) -- Tốc độ 20 lần mỗi giây, nhặt pet như một vị thần
+    end
+end)
+
+-- Nút nhảy server
+JoinBtn.MouseButton1Click:Connect(function()
+    local id = TextBox.Text:gsub("%s+", "")
+    if id ~= "" then
+        pcall(function()
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, id)
+        end)
+    end
+end)
