@@ -98,7 +98,7 @@ task.spawn(function()
 
                                 pcall(function()
                                     obj:InputHoldBegin()
-                                    task.wait(0.03)
+                                    task.wait(0.15)
                                     obj:InputHoldEnd()
                                 end)
 
@@ -109,7 +109,7 @@ task.spawn(function()
 
                             pcall(function()
                                 obj:InputHoldBegin()
-                                task.wait(0.03)
+                                task.wait(0.15)
                                 obj:InputHoldEnd()
                             end)
 
@@ -120,7 +120,7 @@ task.spawn(function()
             end
         end
 
-        task.wait(math.random(30,60)/100) -- 🔥 anti kick
+        task.wait(math.random(15,30)/100) -- 🔥 anti kick
     end
 end)
 
