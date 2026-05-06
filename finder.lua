@@ -1,69 +1,124 @@
-if not game:IsLoaded() then game.Loaded:Wait() end
+-- ===== 1. TẠO GIAO DIỆN (GUI) =====
+local CoreGui = game:GetService("CoreGui")
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
-local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
-local Main = Instance.new("Frame", ScreenGui)
-local Title = Instance.new("TextLabel", Main)
-local JobIdInput = Instance.new("TextBox", Main)
-local JoinBtn = Instance.new("TextButton", Main)
-local HackEBtn = Instance.new("TextButton", Main)
+local ScreenGui = Instance.new("ScreenGui", CoreGui)
+ScreenGui.Name = "FastRobberV6"
 
-Main.Size = UDim2.new(0, 220, 0, 180)
-Main.Position = UDim2.new(0.05, 0, 0.4, 0)
-Main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Main.Active = true Main.Draggable = true
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 200, 0, 150)
+MainFrame.Position = UDim2.new(0.5, -100, 0.4, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainFrame.Active = true
+MainFrame.Draggable = true -- Có thể dùng chuột kéo bảng đi chỗ khác
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Text = "HÚP PET CỔ ĐIỂN"
-Title.TextColor3 = Color3.new(1, 1, 1)
-Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+-- Ô nhập JobId
+local TextBox = Instance.new("TextBox", MainFrame)
+TextBox.Size = UDim2.new(0.8, 0, 0.25, 0)
+TextBox.Position = UDim2.new(0.1, 0, 0.1, 0)
+TextBox.PlaceholderText = "Dán JobId..."
+TextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+TextBox.TextColor3 = Color3.new(1, 1, 1)
+TextBox.ClearTextOnFocus = true
+TextBox.Text = ""
+Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0, 6)
 
--- NHẬP JOBID
-JobIdInput.Size = UDim2.new(0.9, 0, 0, 30)
-JobIdInput.Position = UDim2.new(0.05, 0, 0.25, 0)
-JobIdInput.PlaceholderText = "Dán JobId vào đây..."
-JobIdInput.TextScaled = true
-
--- NÚT BAY
-JoinBtn.Size = UDim2.new(0.9, 0, 0, 35)
-JoinBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
-JoinBtn.Text = "BAY VÀO SERVER"
-JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+-- Nút Join
+local JoinBtn = Instance.new("TextButton", MainFrame)
+JoinBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
+JoinBtn.Position = UDim2.new(0.1, 0, 0.4, 0)
+JoinBtn.Text = "JOIN SERVER"
+JoinBtn.Font = Enum.Font.SourceSansBold
+JoinBtn.TextSize = 16
+JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
 JoinBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", JoinBtn).CornerRadius = UDim.new(0, 6)
 
+-- Nút Auto E
+local AutoEBtn = Instance.new("TextButton", MainFrame)
+AutoEBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
+AutoEBtn.Position = UDim2.new(0.1, 0, 0.7, 0)
+AutoEBtn.Text = "AUTO E: OFF"
+AutoEBtn.Font = Enum.Font.SourceSansBold
+AutoEBtn.TextSize = 16
+AutoEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+AutoEBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", AutoEBtn).CornerRadius = UDim.new(0, 6)
+
+-- ===== 2. LOGIC XỬ LÝ =====
+
+-- Xử lý Nhảy Server
 JoinBtn.MouseButton1Click:Connect(function()
-    local id = JobIdInput.Text
-    if id and #id > 5 then
-        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, id)
+    local jobId = TextBox.Text:gsub("%s+", "")
+    if jobId ~= "" then
+        JoinBtn.Text = "ĐANG NHẢY..."
+        JoinBtn.BackgroundColor3 = Color3.fromRGB(150, 150, 0)
+        
+        local success, err = pcall(function()
+            TeleportService:TeleportToPlaceInstance(game.PlaceId, jobId, LocalPlayer)
+        end)
+        
+        if not success then
+            JoinBtn.Text = "LỖI! THỬ LẠI"
+            JoinBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+            task.wait(2)
+            JoinBtn.Text = "JOIN SERVER"
+            JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+        end
+    else
+        JoinBtn.Text = "CHƯA NHẬP ID!"
+        task.wait(1)
+        JoinBtn.Text = "JOIN SERVER"
     end
 end)
 
--- HACK ÉP E 0 GIÂY MÀ KHÔNG BỊ KICK
-HackEBtn.Size = UDim2.new(0.9, 0, 0, 40)
-HackEBtn.Position = UDim2.new(0.05, 0, 0.7, 0)
-HackEBtn.Text = "HACK E 0s: OFF"
-HackEBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
-HackEBtn.TextColor3 = Color3.new(1, 1, 1)
+-- Logic Cướp Siêu Tốc (Ép 0 Giây)
+local AutoE_Enabled = false
 
-local autoHack = false
-HackEBtn.MouseButton1Click:Connect(function()
-    autoHack = not autoHack
-    HackEBtn.Text = autoHack and "HACK 0s: ĐANG BẬT" or "HACK E 0s: OFF"
-    HackEBtn.BackgroundColor3 = autoHack and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(200, 0, 0)
+AutoEBtn.MouseButton1Click:Connect(function()
+    AutoE_Enabled = not AutoE_Enabled
+    if AutoE_Enabled then
+        AutoEBtn.Text = "AUTO E: ON"
+        AutoEBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+    else
+        AutoEBtn.Text = "AUTO E: OFF"
+        AutoEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+    end
 end)
 
--- Lõi Hack Nhặt Đồ 0 Giây (Bypass 2 giây của game)
 task.spawn(function()
     while true do
-        task.wait(0.1)
-        if autoHack then
-            for _, prompt in pairs(workspace:GetDescendants()) do
-                if prompt:IsA("ProximityPrompt") then
-                    prompt.HoldDuration = 0 -- Ép thời gian chờ về 0
-                    if fireproximityprompt then
-                        fireproximityprompt(prompt) -- Chọt cho nhặt luôn
+        if AutoE_Enabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local myPos = LocalPlayer.Character.HumanoidRootPart.Position
+            
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                if obj:IsA("ProximityPrompt") then
+                    -- Kiểm tra phím E
+                    if obj.KeyboardKeyCode == Enum.KeyCode.E then
+                        local parent = obj.Parent
+                        if parent and parent:IsA("BasePart") then
+                            local dist = (myPos - parent.Position).Magnitude
+                            if dist <= obj.MaxActivationDistance then
+                                -- ÉP VỀ 0 GIÂY VÀ KÍCH HOẠT TỨC THÌ
+                                obj.HoldDuration = 0
+                                obj:InputHoldBegin()
+                                obj:InputHoldEnd()
+                            end
+                        else
+                            -- Nếu pet không phải Part, cứ ép 0s và nhặt cho chắc
+                            obj.HoldDuration = 0
+                            obj:InputHoldBegin()
+                            obj:InputHoldEnd()
+                        end
                     end
                 end
             end
         end
+        task.wait(0.17) -- Tốc độ nhặt cực nhanh, khoảng 6 lần/giây để tránh bị kick
     end
 end)
+
+print("✅ Master V6 đã sẵn sàng!")
