@@ -231,7 +231,7 @@ end
 
 end
 
-task.wait(0.90) -- Tốc độ nhặt cực nhanh, khoảng 6 lần/giây để tránh bị kick
+task.wait(0.17) -- Tốc độ nhặt cực nhanh, khoảng 6 lần/giây để tránh bị kick
 
 end
 
