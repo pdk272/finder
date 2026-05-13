@@ -95,10 +95,10 @@ AutoEBtn.MouseButton1Click:Connect(function()
 	AutoE_Enabled = not AutoE_Enabled
 
 	if AutoE_Enabled then
-		AutoEBtn.Text = "AUTO: ON"
+		AutoEBtn.Text = "haha: ON"
 		AutoEBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
 	else
-		AutoEBtn.Text = "AUTO: OFF"
+		AutoEBtn.Text = "haha: OFF"
 		AutoEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
 	end
 end)
@@ -123,7 +123,7 @@ task.spawn(function()
 									obj.HoldDuration = 0
 
 									if fireproximityprompt then
-										fireproximityprompt(obj)
+										fireproximityprompt(obj, 3)
 									end
 								end
 							end
