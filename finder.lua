@@ -1,137 +1,475 @@
-local Players = game:GetService("Players")
-local TeleportService = game:GetService("TeleportService")
-local Lighting = game:GetService("Lighting")
 local CoreGui = game:GetService("CoreGui")
+
+
+
+local TeleportService = game:GetService("TeleportService")
+
+
+
+local Players = game:GetService("Players")
+
+
 
 local LocalPlayer = Players.LocalPlayer
 
--- ================= GUI =================
+
+
+
+
+
+
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
+
+
+
 ScreenGui.Name = "FastRobberV6"
 
+
+
+
+
+
+
 local MainFrame = Instance.new("Frame", ScreenGui)
+
+
+
 MainFrame.Size = UDim2.new(0, 200, 0, 150)
+
+
+
 MainFrame.Position = UDim2.new(0.5, -100, 0.4, 0)
+
+
+
 MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+
+
+
 MainFrame.Active = true
-MainFrame.Draggable = true
+
+
+
+MainFrame.Draggable = true -- Có thể dùng chuột kéo bảng đi chỗ khác
+
+
+
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
 
--- ================= TEXTBOX =================
+
+
+
+
+
+
+-- Ô nhập JobId
+
+
+
 local TextBox = Instance.new("TextBox", MainFrame)
-TextBox.Size = UDim2.new(0.8, 0, 0.22, 0)
-TextBox.Position = UDim2.new(0.1, 0, 0.08, 0)
-TextBox.PlaceholderText = "JobId..."
-TextBox.BackgroundColor3 = Color3.fromRGB(45,45,45)
-TextBox.TextColor3 = Color3.new(1,1,1)
+
+
+
+TextBox.Size = UDim2.new(0.8, 0, 0.25, 0)
+
+
+
+TextBox.Position = UDim2.new(0.1, 0, 0.1, 0)
+
+
+
+TextBox.PlaceholderText = "Dán JobId..."
+
+
+
+TextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+
+
+
+TextBox.TextColor3 = Color3.new(1, 1, 1)
+
+
+
+TextBox.ClearTextOnFocus = true
+
+
+
 TextBox.Text = ""
-Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0,6)
-
--- ================= BUTTONS =================
-local function createBtn(text, y, color)
-    local b = Instance.new("TextButton", MainFrame)
-    b.Size = UDim2.new(0.8, 0, 0.22, 0)
-    b.Position = UDim2.new(0.1, 0, y, 0)
-    b.Text = text
-    b.BackgroundColor3 = color
-    b.TextColor3 = Color3.new(1,1,1)
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0,6)
-    return b
-end
-
-local JoinBtn = createBtn("THAM GIA SERVER", 0.32, Color3.fromRGB(0,100,200))
-local BoostBtn = createBtn("BOOST FPS: ON", 0.76, Color3.fromRGB(150,0,0))
-local AutoEBtn = createBtn("AUTO E: OFF", 0.54, Color3.fromRGB(0,200,0))
--- ================= FIX LAG =================
-local function FixLag()
-    Lighting.GlobalShadows = false
-    Lighting.FogEnd = 1e10
-    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-
-    for _, v in ipairs(workspace:GetDescendants()) do
-        if v:IsA("ParticleEmitter") or v:IsA("Trail") then
-            v.Enabled = false
-        elseif v:IsA("Decal") or v:IsA("Texture") then
-            v:Destroy()
-        elseif v:IsA("BasePart") then
-            v.Material = Enum.Material.SmoothPlastic
-            v.Reflectance = 0
-        end
-    end
-end
-----Conne-----------------------------Conne------ConnConne-
-task.spawn(function()
-    task.wait(0.5) -- chờ game load nhẹ
-
-    FixLag()
-
-    BoostBtn.Text = "BOOST FPS: ON"
-    BoostBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
-end)
 
 
--- ================= JOIN SERVER =================
+
+Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0, 6)
+
+
+
+
+
+
+
+-- Nút Join
+
+
+
+local JoinBtn = Instance.new("TextButton", MainFrame)
+
+
+
+JoinBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
+
+
+
+JoinBtn.Position = UDim2.new(0.1, 0, 0.4, 0)
+
+
+
+JoinBtn.Text = "tham gia"
+
+
+
+JoinBtn.Font = Enum.Font.SourceSansBold
+
+
+
+JoinBtn.TextSize = 16
+
+
+
+JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+
+
+
+JoinBtn.TextColor3 = Color3.new(1, 1, 1)
+
+
+
+Instance.new("UICorner", JoinBtn).CornerRadius = UDim.new(0, 6)
+
+
+
+
+
+
+
+-- Nút Auto E
+
+
+
+local AutoEBtn = Instance.new("TextButton", MainFrame)
+
+
+
+AutoEBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
+
+
+
+AutoEBtn.Position = UDim2.new(0.1, 0, 0.7, 0)
+
+
+
+AutoEBtn.Text = "AUTO E: OFF"
+
+
+
+AutoEBtn.Font = Enum.Font.SourceSansBold
+
+
+
+AutoEBtn.TextSize = 16
+
+
+
+AutoEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+
+
+
+AutoEBtn.TextColor3 = Color3.new(1, 1, 1)
+
+
+
+Instance.new("UICorner", AutoEBtn).CornerRadius = UDim.new(0, 6)
+
+
+
+
+
+
+
+-- ===== 2. LOGIC XỬ LÝ =====
+
+
+
+
+
+
+
+-- Xử lý Nhảy Server
+
+
+
 JoinBtn.MouseButton1Click:Connect(function()
-    local jobId = TextBox.Text:gsub("%s+", "")
-    if jobId == "" then jobId = game.JobId end
 
-    JoinBtn.Text = "ĐANG NHẢY..."
 
-    pcall(function()
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, jobId, LocalPlayer)
-    end)
 
-    task.wait(1)
-    JoinBtn.Text = "THAM GIA SERVER"
+local jobId = TextBox.Text:gsub("%s+", "")
+
+
+
+if jobId ~= "" then
+
+
+
+JoinBtn.Text = "ĐANG NHẢY..."
+
+
+
+JoinBtn.BackgroundColor3 = Color3.fromRGB(150, 150, 0)
+
+
+
+
+
+local success, err = pcall(function()
+
+
+
+TeleportService:TeleportToPlaceInstance(game.PlaceId, jobId, LocalPlayer)
+
+
+
 end)
 
--- ================= BOOST FPS =================
-BoostBtn.MouseButton1Click:Connect(function()
-    FixLag()
-    BoostBtn.Text = "ĐÃ BOOST FPS"
-    BoostBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
+
+
+
+
+if not success then
+
+
+
+JoinBtn.Text = "LỖI! THỬ LẠI"
+
+
+
+JoinBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+
+
+
+task.wait(2)
+
+
+
+JoinBtn.Text = "JOIN SERVER"
+
+
+
+JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+
+
+
+end
+
+
+
+else
+
+
+
+JoinBtn.Text = "CHƯA NHẬP ID!"
+
+
+
+task.wait(1)
+
+
+
+JoinBtn.Text = "JOIN SERVER"
+
+
+
+end
+
+
+
 end)
 
--- ================= AUTO E (BẢN CŨ ÉP 0 GIÂY) =================
-local autoE = false
+
+
+
+
+
+
+-- Logic Cướp Siêu Tốc (Ép 0 Giây)
+
+
+
+local AutoE_Enabled = false
+
+
+
+
+
+
 
 AutoEBtn.MouseButton1Click:Connect(function()
-    autoE = not autoE
-    AutoEBtn.Text = autoE and "AUTO E: ON" or "AUTO E: OFF"
-    AutoEBtn.BackgroundColor3 = autoE and Color3.fromRGB(0,180,0) or Color3.fromRGB(150,0,0)
+
+
+
+AutoE_Enabled = not AutoE_Enabled
+
+
+
+if AutoE_Enabled then
+
+
+
+AutoEBtn.Text = "AUTO E: ON"
+
+
+
+AutoEBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+
+
+
+else
+
+
+
+AutoEBtn.Text = "AUTO E: OFF"
+
+
+
+AutoEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+
+
+
+end
+
+
+
 end)
+
+
+
+
+
+
 
 task.spawn(function()
-    while true do
-        if autoE and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local myPos = LocalPlayer.Character.HumanoidRootPart.Position
 
-            for _, obj in ipairs(workspace:GetDescendants()) do
-                if obj:IsA("ProximityPrompt") then
-                    if obj.KeyboardKeyCode == Enum.KeyCode.E then
-                        local parent = obj.Parent
 
-                        if parent and parent:IsA("BasePart") then
-                            if (myPos - parent.Position).Magnitude <= obj.MaxActivationDistance then
-                                obj.HoldDuration = 0
-                                pcall(function()
-                                    obj:InputHoldBegin()
-                                    obj:InputHoldEnd()
-                                end)
-                            end
-                        else
-                            obj.HoldDuration = 0
-                            pcall(function()
-                                obj:InputHoldBegin()
-                                obj:InputHoldEnd()
-                            end)
-                        end
-                    end
-                end
-            end
-        end
 
-        task.wait(0.2) -- giống bản cũ (nhanh nhưng nặng)
-    end
+while true do
+
+
+
+if AutoE_Enabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+
+
+
+local myPos = LocalPlayer.Character.HumanoidRootPart.Position
+
+
+
+
+
+for _, obj in ipairs(workspace:GetDescendants()) do
+
+
+
+if obj:IsA("ProximityPrompt") then
+
+
+
+-- Kiểm tra phím E
+
+
+
+if obj.KeyboardKeyCode == Enum.KeyCode.E then
+
+
+
+local parent = obj.Parent
+
+
+
+if parent and parent:IsA("BasePart") then
+
+
+
+local dist = (myPos - parent.Position).Magnitude
+
+
+
+if dist <= obj.MaxActivationDistance then
+
+
+
+-- ÉP VỀ 0 GIÂY VÀ KÍCH HOẠT TỨC THÌ
+
+
+
+obj.HoldDuration = 0
+
+
+
+obj:InputHoldBegin()
+
+
+
+obj:InputHoldEnd()
+
+
+
+end
+
+
+
+else
+
+
+
+-- Nếu pet không phải Part, cứ ép 0s và nhặt cho chắc
+
+
+
+obj.HoldDuration = 0
+
+
+
+obj:InputHoldBegin()
+
+
+
+obj:InputHoldEnd()
+
+
+
+end
+
+
+
+end
+
+
+
+end
+
+
+
+end
+
+
+
+end
+
+
+
+task.wait(0.17) -- Tốc độ nhặt cực nhanh, khoảng 6 lần/giây để tránh bị kick
+
+
+
+end
+
+
+
 end)
-
