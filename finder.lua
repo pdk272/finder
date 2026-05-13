@@ -40,10 +40,8 @@ local function createBtn(text, y, color)
 end
 
 local JoinBtn = createBtn("THAM GIA SERVER", 0.32, Color3.fromRGB(0,100,200))
-local BoostBtn = createBtn("BOOST FPS: ON", 0.54, Color3.fromRGB(0,200,0))
-local AutoEBtn = createBtn("AUTO E: OFF", 0.76, Color3.fromRGB(150,0,0))
-local CopyBtn = createBtn("COPY JOBID", 0.98, Color3.fromRGB(80,80,80))
-local JumpBtn = createBtn("JUMP BOOST", 1.18, Color3.fromRGB(80,120,255))
+local BoostBtn = createBtn("BOOST FPS: ON", 0.76, Color3.fromRGB(150,0,0))
+local AutoEBtn = createBtn("AUTO E: OFF", 0.54, Color3.fromRGB(0,200,0))
 -- ================= FIX LAG =================
 local function FixLag()
     Lighting.GlobalShadows = false
@@ -71,44 +69,69 @@ task.spawn(function()
     BoostBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
 end)
 
---[[
-    🚀 JUMP BOOST V10 (ANTI-CHANCE & ANTI-KICK)
-    - Cơ chế: Thay đổi JumpPower thay vì dùng BodyVelocity.
-    - Bảo mật: Tự động trả lại thông số gốc ngay sau khi nhảy.
-    - Hiệu suất: Không tạo thêm Instance mới, giảm lag tối đa.
-]]
 
-JumpBtn.MouseButton1Click:Connect(function()
-    local char = LocalPlayer.Character
-    if not char then return end
+-- ================= JOIN SERVER =================
+JoinBtn.MouseButton1Click:Connect(function()
+    local jobId = TextBox.Text:gsub("%s+", "")
+    if jobId == "" then jobId = game.JobId end
 
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    
-    if hum then
-        -- 1. Lấy thông số gốc để tránh làm hỏng nhân vật
-        local originalPower = hum.JumpPower
-        hum.UseJumpPower = true -- Đảm bảo game dùng JumpPower thay vì JumpHeight
+    JoinBtn.Text = "ĐANG NHẢY..."
 
-        -- 2. Tăng lực nhảy nhẹ (Ngưỡng an toàn thường là 50-70)
-        -- Đừng để quá cao (trên 100) nếu không muốn bị hệ thống Server-side kick
-        hum.JumpPower =75
+    pcall(function()
+        TeleportService:TeleportToPlaceInstance(game.PlaceId, jobId, LocalPlayer)
+    end)
 
-        -- 3. Kích hoạt lệnh nhảy hợp lệ của Engine
-        hum.Jump = true
+    task.wait(1)
+    JoinBtn.Text = "THAM GIA SERVER"
+end)
 
-        -- 4. Thay đổi trạng thái nhảy để đồng bộ hóa
-        hum:ChangeState(Enum.HumanoidStateType.Jumping)
+-- ================= BOOST FPS =================
+BoostBtn.MouseButton1Click:Connect(function()
+    FixLag()
+    BoostBtn.Text = "ĐÃ BOOST FPS"
+    BoostBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
+end)
 
-        -- 5. Trả lại thông số gốc sau một khoảng thời gian cực ngắn
-        -- Việc này giúp server thấy rằng ông chỉ có JumpPower cao trong chớp mắt
-        task.delay(0.05, function()
-            if hum then
-                hum.JumpPower = originalPower
+-- ================= AUTO E (BẢN CŨ ÉP 0 GIÂY) =================
+local autoE = false
+
+AutoEBtn.MouseButton1Click:Connect(function()
+    autoE = not autoE
+    AutoEBtn.Text = autoE and "AUTO E: ON" or "AUTO E: OFF"
+    AutoEBtn.BackgroundColor3 = autoE and Color3.fromRGB(0,180,0) or Color3.fromRGB(150,0,0)
+end)
+
+task.spawn(function()
+    while true do
+        if autoE and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local myPos = LocalPlayer.Character.HumanoidRootPart.Position
+
+            for _, obj in ipairs(workspace:GetDescendants()) do
+                if obj:IsA("ProximityPrompt") then
+                    if obj.KeyboardKeyCode == Enum.KeyCode.E then
+                        local parent = obj.Parent
+
+                        if parent and parent:IsA("BasePart") then
+                            if (myPos - parent.Position).Magnitude <= obj.MaxActivationDistance then
+                                obj.HoldDuration = 0
+                                pcall(function()
+                                    obj:InputHoldBegin()
+                                    obj:InputHoldEnd()
+                                end)
+                            end
+                        else
+                            obj.HoldDuration = 0
+                            pcall(function()
+                                obj:InputHoldBegin()
+                                obj:InputHoldEnd()
+                            end)
+                        end
+                    end
+                end
             end
-        end)
-    end
+        end
 
-    -- Hiệu ứng UI
-    JumpBtn.Text = "⚡ BOOSTED"
-    task.wait(0.5)
-    JumpBtn.Te
+        task.wait(0.2) -- giống bản cũ (nhanh nhưng nặng)
+    end
+end)
+
