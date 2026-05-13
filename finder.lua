@@ -91,7 +91,7 @@ JumpBtn.MouseButton1Click:Connect(function()
 
         -- 2. Tăng lực nhảy nhẹ (Ngưỡng an toàn thường là 50-70)
         -- Đừng để quá cao (trên 100) nếu không muốn bị hệ thống Server-side kick
-        hum.JumpPower =55 
+        hum.JumpPower =75
 
         -- 3. Kích hoạt lệnh nhảy hợp lệ của Engine
         hum.Jump = true
@@ -101,7 +101,7 @@ JumpBtn.MouseButton1Click:Connect(function()
 
         -- 5. Trả lại thông số gốc sau một khoảng thời gian cực ngắn
         -- Việc này giúp server thấy rằng ông chỉ có JumpPower cao trong chớp mắt
-        task.delay(0,01, function()
+        task.delay(0.05, function()
             if hum then
                 hum.JumpPower = originalPower
             end
@@ -111,85 +111,4 @@ JumpBtn.MouseButton1Click:Connect(function()
     -- Hiệu ứng UI
     JumpBtn.Text = "⚡ BOOSTED"
     task.wait(0.5)
-    JumpBtn.Text = "JUMP BOOST"
-end)
--- ================= JOIN SERVER =================
-JoinBtn.MouseButton1Click:Connect(function()
-    local jobId = TextBox.Text:gsub("%s+", "")
-    if jobId == "" then jobId = game.JobId end
-
-    JoinBtn.Text = "ĐANG NHẢY..."
-
-    pcall(function()
-        TeleportService:TeleportToPlaceInstance(game.PlaceId, jobId, LocalPlayer)
-    end)
-
-    task.wait(1)
-    JoinBtn.Text = "THAM GIA SERVER"
-end)
-
----------------------------------------------------
-CopyBtn.MouseButton1Click:Connect(function()
-    pcall(function()
-        setclipboard(tostring(game.JobId))
-    end)
-
-    CopyBtn.Text = "ĐÃ COPY!"
-    CopyBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
-
-    task.wait(1)
-
-    CopyBtn.Text = "COPY JOBID"
-    CopyBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-end)
--- ================= BOOST FPS =================
-BoostBtn.MouseButton1Click:Connect(function()
-    FixLag()
-    BoostBtn.Text = "ĐÃ BOOST FPS"
-    BoostBtn.BackgroundColor3 = Color3.fromRGB(0,200,0)
-end)
-
--- ================= AUTO E (BẢN CŨ ÉP 0 GIÂY) =================
-local autoE = false
-
-AutoEBtn.MouseButton1Click:Connect(function()
-    autoE = not autoE
-    AutoEBtn.Text = autoE and "AUTO E: ON" or "AUTO E: OFF"
-    AutoEBtn.BackgroundColor3 = autoE and Color3.fromRGB(0,180,0) or Color3.fromRGB(150,0,0)
-end)
-
-task.spawn(function()
-    while true do
-        if autoE and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local myPos = LocalPlayer.Character.HumanoidRootPart.Position
-
-            for _, obj in ipairs(workspace:GetDescendants()) do
-                if obj:IsA("ProximityPrompt") then
-                    if obj.KeyboardKeyCode == Enum.KeyCode.E then
-                        local parent = obj.Parent
-
-                        if parent and parent:IsA("BasePart") then
-                            if (myPos - parent.Position).Magnitude <= obj.MaxActivationDistance then
-                                obj.HoldDuration = 0
-                                pcall(function()
-                                    obj:InputHoldBegin()
-                                    obj:InputHoldEnd()
-                                end)
-                            end
-                        else
-                            obj.HoldDuration = 0
-                            pcall(function()
-                                obj:InputHoldBegin()
-                                obj:InputHoldEnd()
-                            end)
-                        end
-                    end
-                end
-            end
-        end
-
-        task.wait(0.17) -- giống bản cũ (nhanh nhưng nặng)
-    end
-end)
-
-print("✅ FastRobber V6 FULL LOADED (AutoE + Boost + FixLag)")
+    JumpBtn.Te
