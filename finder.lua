@@ -166,7 +166,7 @@ AutoEBtn.Position = UDim2.new(0.1, 0, 0.7, 0)
 
 
 
-AutoEBtn.Text = "AUTO E: OFF"
+AutoEBtn.Text = " E: OFF"
 
 
 
@@ -464,7 +464,7 @@ end
 
 
 
-task.wait(0.17) -- Tốc độ nhặt cực nhanh, khoảng 6 lần/giây để tránh bị kick
+task.wait(0.27) -- Tốc độ nhặt cực nhanh, khoảng 6 lần/giây để tránh bị kick
 
 
 
