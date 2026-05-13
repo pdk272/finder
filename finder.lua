@@ -166,7 +166,7 @@ AutoEBtn.Position = UDim2.new(0.1, 0, 0.7, 0)
 
 
 
-AutoEBtn.Text = " E: OFF"
+AutoEBtn.Text = " AutoE: OFF"
 
 
 
@@ -322,7 +322,7 @@ if AutoE_Enabled then
 
 
 
-AutoEBtn.Text = "AUTO E: ON"
+AutoEBtn.Text = "AUTO: ON"
 
 
 
@@ -334,7 +334,7 @@ else
 
 
 
-AutoEBtn.Text = "AUTO E: OFF"
+AutoEBtn.Text = "AUTO: OFF"
 
 
 
