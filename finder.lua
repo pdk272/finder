@@ -1,138 +1,106 @@
-local CoreGui = game:GetService("CoreGui")
-local TeleportService = game:GetService("TeleportService")
 local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+
 local LocalPlayer = Players.LocalPlayer
 
+-- GUI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FastRobberV6"
+ScreenGui.Name = "Grabber"
 ScreenGui.Parent = CoreGui
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Parent = ScreenGui
-MainFrame.Size = UDim2.new(0, 200, 0, 150)
-MainFrame.Position = UDim2.new(0.5, -100, 0.4, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-MainFrame.Active = true
-MainFrame.Draggable = true
+local Frame = Instance.new("Frame")
+Frame.Parent = ScreenGui
+Frame.Size = UDim2.new(0,180,0,90)
+Frame.Position = UDim2.new(0.5,-90,0.4,0)
+Frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Frame.Active = true
+Frame.Draggable = true
 
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,8)
 
--- Ô nhập JobId
-local TextBox = Instance.new("TextBox")
-TextBox.Parent = MainFrame
-TextBox.Size = UDim2.new(0.8, 0, 0.25, 0)
-TextBox.Position = UDim2.new(0.1, 0, 0.1, 0)
-TextBox.PlaceholderText = "Dán JobId..."
-TextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-TextBox.TextColor3 = Color3.new(1, 1, 1)
-TextBox.ClearTextOnFocus = true
-TextBox.Text = ""
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Parent = Frame
+ToggleBtn.Size = UDim2.new(0.8,0,0.5,0)
+ToggleBtn.Position = UDim2.new(0.1,0,0.25,0)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(150,0,0)
+ToggleBtn.TextColor3 = Color3.new(1,1,1)
+ToggleBtn.Font = Enum.Font.SourceSansBold
+ToggleBtn.TextSize = 20
+ToggleBtn.Text = "GRAB: OFF"
 
-Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0,8)
 
--- Nút Join
-local JoinBtn = Instance.new("TextButton")
-JoinBtn.Parent = MainFrame
-JoinBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
-JoinBtn.Position = UDim2.new(0.1, 0, 0.4, 0)
-JoinBtn.Text = "THAM GIA"
-JoinBtn.Font = Enum.Font.SourceSansBold
-JoinBtn.TextSize = 16
-JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-JoinBtn.TextColor3 = Color3.new(1, 1, 1)
+-- TOGGLE
+local Enabled = false
 
-Instance.new("UICorner", JoinBtn).CornerRadius = UDim.new(0, 6)
+ToggleBtn.MouseButton1Click:Connect(function()
+	Enabled = not Enabled
 
--- Nút Auto E
-local AutoEBtn = Instance.new("TextButton")
-AutoEBtn.Parent = MainFrame
-AutoEBtn.Size = UDim2.new(0.8, 0, 0.25, 0)
-AutoEBtn.Position = UDim2.new(0.1, 0, 0.7, 0)
-AutoEBtn.Text = "AUTO: OFF"
-AutoEBtn.Font = Enum.Font.SourceSansBold
-AutoEBtn.TextSize = 16
-AutoEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-AutoEBtn.TextColor3 = Color3.new(1, 1, 1)
+	if Enabled then
+		ToggleBtn.Text = "GRAB: ON"
+		ToggleBtn.BackgroundColor3 = Color3.fromRGB(0,180,0)
+	else
+		ToggleBtn.Text = "GRAB: OFF"
+		ToggleBtn.BackgroundColor3 = Color3.fromRGB(150,0,0)
+	end
+end)
 
-Instance.new("UICorner", AutoEBtn).CornerRadius = UDim.new(0, 6)
+-- CACHE PROMPTS
+local GrabPrompts = {}
 
--- Join Server
-JoinBtn.MouseButton1Click:Connect(function()
-	local jobId = TextBox.Text:gsub("%s+", "")
+local function addPrompt(v)
+	if v:IsA("ProximityPrompt") and v.ActionText == "Grab" then
+		table.insert(GrabPrompts, v)
+	end
+end
 
-	if jobId ~= "" then
-		JoinBtn.Text = "ĐANG NHẢY..."
-		JoinBtn.BackgroundColor3 = Color3.fromRGB(150, 150, 0)
+for _, v in ipairs(workspace:GetDescendants()) do
+	addPrompt(v)
+end
 
-		local success = pcall(function()
-			TeleportService:TeleportToPlaceInstance(
-				game.PlaceId,
-				jobId,
-				LocalPlayer
-			)
-		end)
+workspace.DescendantAdded:Connect(addPrompt)
 
-		if not success then
-			JoinBtn.Text = "LỖI!"
-			JoinBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+-- GET PART
+local function getPart(prompt)
+	local parent = prompt.Parent
 
-			task.wait(2)
-
-			JoinBtn.Text = "THAM GIA"
-			JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+	while parent do
+		if parent:IsA("BasePart") then
+			return parent
 		end
-	else
-		JoinBtn.Text = "CHƯA NHẬP ID!"
-		task.wait(1)
-		JoinBtn.Text = "THAM GIA"
+
+		parent = parent.Parent
 	end
-end)
+end
 
--- Auto E
-local AutoE_Enabled = false
-
-AutoEBtn.MouseButton1Click:Connect(function()
-	AutoE_Enabled = not AutoE_Enabled
-
-	if AutoE_Enabled then
-		AutoEBtn.Text = "haha: ON"
-		AutoEBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
-	else
-		AutoEBtn.Text = "haha: OFF"
-		AutoEBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-	end
-end)
-
+-- AUTO GRAB
 task.spawn(function()
-	while true do
-		if AutoE_Enabled and LocalPlayer.Character then
+	while task.wait(0.25) do
+		if Enabled and LocalPlayer.Character then
 			local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 
 			if hrp then
-				local myPos = hrp.Position
+				for _, prompt in ipairs(GrabPrompts) do
+					if prompt and prompt.Parent then
+						local part = getPart(prompt)
 
-				for _, obj in ipairs(workspace:GetDescendants()) do
-					if obj:IsA("ProximityPrompt") then
-						if obj.KeyboardKeyCode == Enum.KeyCode.E then
-							local parent = obj.Parent
+						if part then
+							local dist = (hrp.Position - part.Position).Magnitude
 
-							if parent and parent:IsA("BasePart") then
-								local dist = (myPos - parent.Position).Magnitude
-
-								if dist <= obj.MaxActivationDistance then
-									obj.HoldDuration = 0
+							if dist <= 10 then
+								pcall(function()
+									prompt.HoldDuration = 0
+									prompt.MaxActivationDistance = 20
 
 									if fireproximityprompt then
-										fireproximityprompt(obj, 3)
+										fireproximityprompt(prompt)
 									end
-								end
+								end)
 							end
 						end
 					end
 				end
 			end
 		end
-
-		task.wait(1)
 	end
 end)
